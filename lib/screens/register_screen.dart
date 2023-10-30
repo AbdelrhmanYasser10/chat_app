@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:chat_application_it/layout/main_layout.dart';
 import 'package:chat_application_it/screens/home_screen.dart';
+import 'package:chat_application_it/screens/login_screen.dart';
 import 'package:chat_application_it/shared/cubits/app_cubit/app_cubit.dart';
 import 'package:chat_application_it/shared/widgets/my_button/my_button.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
         if(state is RegisterSuccessfully){
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Registered Successfully")));
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>HomeScreen()), (route) => false);
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>const MainLayout()), (route) => false);
         }
         if(state is RegisterError){
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
@@ -96,68 +98,90 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         height: 20.0,
                       ),
                       Card(
-                        child: Column(
-                          children: [
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                            MyFormField(
-                              controller: _emailController,
-                              prefixIcon: const Icon(
-                                  Icons.email_outlined
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 20.0,
                               ),
-                              text: "Email",
-                              validator: (value) {
-                                RegExp regex = RegExp(
-                                    "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\$");
-                                if (!regex.hasMatch(value!)) {
-                                  return "Invalid Email";
-                                }
-                                if (value.isEmpty) {
-                                  return "Email can not be empty";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                            MyFormField(
-                              controller: _nameController,
-                              prefixIcon: const Icon(
-                                  Icons.person_4_outlined
+                              MyFormField(
+                                controller: _emailController,
+                                prefixIcon: const Icon(
+                                    Icons.email_outlined
+                                ),
+                                text: "Email",
+                                validator: (value) {
+                                  RegExp regex = RegExp(
+                                      "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\$");
+                                  if (!regex.hasMatch(value!)) {
+                                    return "Invalid Email";
+                                  }
+                                  if (value.isEmpty) {
+                                    return "Email can not be empty";
+                                  }
+                                  return null;
+                                },
                               ),
-                              text: "Username",
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return "Username can not be empty";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                            MyFormField(
-                              isPassword: true,
-                              isSecured: true,
-                              controller: _passwordController,
-                              prefixIcon: const Icon(
-                                  Icons.lock
+                              const SizedBox(
+                                height: 20.0,
                               ),
-                              text: "Password",
-                              validator: (value) {
-                                if (value!.length < 6) {
-                                  return "Password must be more than 6 characters";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                          ],
+                              MyFormField(
+                                controller: _nameController,
+                                prefixIcon: const Icon(
+                                    Icons.person_4_outlined
+                                ),
+                                text: "Username",
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return "Username can not be empty";
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(
+                                height: 20.0,
+                              ),
+                              MyFormField(
+                                isPassword: true,
+                                isSecured: true,
+                                controller: _passwordController,
+                                prefixIcon: const Icon(
+                                    Icons.lock
+                                ),
+                                text: "Password",
+                                validator: (value) {
+                                  if (value!.length < 6) {
+                                    return "Password must be more than 6 characters";
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(
+                                height: 20.0,
+                              ),
+                            ],
+                          ),
                         ),
+                      ),
+                      Row(
+                        mainAxisAlignment:  MainAxisAlignment.center,
+                        children: [
+                         const Text(
+                            "Already have an account?",
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                          TextButton(
+                              onPressed:(){
+                                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>const LoginScreen()), (route) => false);
+                              },
+                              child: const Text(
+                                'Login',
+                              ),
+                          ),
+                        ],
                       ),
                       const SizedBox(
                         height: 20.0,

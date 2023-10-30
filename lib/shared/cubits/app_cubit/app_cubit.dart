@@ -10,6 +10,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 
+import '../../../models/user_model.dart';
+
 part 'app_state.dart';
 
 class AppCubit extends Cubit<AppState> {
@@ -22,12 +24,15 @@ class AppCubit extends Cubit<AppState> {
   CroppedFile? finalImage;
 
   //Auth Variables
-  var _auth = FirebaseAuth.instance;
-  var _database = FirebaseFirestore.instance;
-  var _storage = FirebaseStorage.instance;
+  final _auth = FirebaseAuth.instance;
+  final _database = FirebaseFirestore.instance;
+  final _storage = FirebaseStorage.instance;
+
+  //current User
+  UserModel? user;
 
   void getImage(){
-    picker.pickImage(source: ImageSource.camera).then((value) {
+    picker.pickImage(source: ImageSource.gallery).then((value) {
       if(value == null){
         emit(GetImageError("Didn't capture image"));
       }
@@ -117,6 +122,134 @@ class AppCubit extends Cubit<AppState> {
         emit(RegisterError(error.toString()));
       });
     }
+
+  }
+
+
+  void setUserOffline(){
+    user!.online = false;
+    _database.
+    collection("users").
+    doc(user!.userId)
+        .set(user!.toMap()).then((value) {
+      emit(SetUserOffline());
+    });
+  }
+
+  void setUserOnline(){
+    user!.online = true;
+    _database.
+    collection("users").
+    doc(user!.userId)
+        .set(user!.toMap()).then((value) {
+      emit(SetUserOnline());
+    });
+  }
+
+void login({
+  required String email,
+  required String password,
+}){
+    emit(LoginLoading());
+    _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+    ).then((value) {
+      //set user online;
+      setUserOnline();
+      //get data
+      _database.
+      collection("users").
+      doc(value.user!.uid).
+      get().then((value){
+        user = UserModel.fromJson(value.data()!);
+        emit(LoginSuccessfully());
+      }).catchError((error){
+        emit(LoginError(error.toString()));
+      });
+    }).catchError((error){
+      emit(LoginError(error.toString()));
+    });
+
+}
+
+
+  void getUserData(){
+    emit(UserDataLoading());
+    if(_auth.currentUser == null){
+      emit(UserDataError());
+    }
+    else{
+      String uId = _auth.currentUser!.uid;
+      //setUserOnline(userId: uId);
+      _database.
+      collection("users").
+      doc(uId).get().then((value) {
+        user = UserModel.fromJson(value.data()!);
+        if(user!.online == false) {
+          setUserOnline();
+          emit(UserDataSuccessfully());
+        }
+        else{
+          emit(UserDataSuccessfully());
+        }
+      }).catchError((error){
+        print(error.toString());
+        emit(UserDataError());
+      });
+    }
+  }
+
+  List<UserModel> users = [];
+  void getContactsData(){
+    _database.
+    collection("users").
+    snapshots().
+    listen((event) {
+      users = [];
+      event.docs.forEach((element) {
+        if(element.data()['userId'] != user!.userId) {
+          users.add(UserModel.fromJson(element.data()));
+        }
+      });
+      emit(GetAllUsers());
+    });
+  }
+
+  void updateUserData({
+  required String name,
+  }){
+    emit(UserEditDataLoading());
+    _storage.
+    ref('userImages').
+    child(finalImage!.path.split('/').last).
+    putFile(
+      File(
+        finalImage!.path
+      ),
+    ).then((p0){
+      p0.ref.getDownloadURL().then((image){
+        _database.
+        collection("users").
+        doc(user!.userId).
+        update({
+          'image':image,
+          'name':name,
+        }).then((value) {
+          user!.imgLink = image;
+          user!.name = name;
+          emit(UserEditDataSuccessfully());
+        }).catchError((error){
+          emit(UserDataError());
+        });
+      }).catchError((error){
+        emit(UserDataError());
+
+      });
+    }).catchError((error){
+      emit(UserDataError());
+
+    });
 
   }
 }

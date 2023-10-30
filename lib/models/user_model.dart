@@ -7,9 +7,19 @@ class UserModel{
 
   UserModel.fromJson(Map<String,dynamic>json){
     userId = json["userId"];
-    imgLink = json["imgUrl"];
+    imgLink = json["image"];
     name = json["name"];
     email = json["email"];
-    online = json["state"];
+    online = json["online"];
+  }
+
+  Map<String,dynamic> toMap(){
+    return {
+      'userId':userId,
+      'email':email,
+      'name':name,
+      'online':online,
+      'image':imgLink,
+    };
   }
 }
