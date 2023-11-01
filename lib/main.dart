@@ -8,11 +8,7 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-        apiKey: "AIzaSyAHM4UTdDFtrFoTKq3tZHkj2DZ8_Ne0jWI",
-        appId: "1:896236007624:android:711da93572ae8a6c36f5fd",
-        messagingSenderId: "896236007624",
-        projectId: "chat-app-itsharks",
-        storageBucket: "chat-app-itsharks.appspot.com",
+      /*Default Options*/
     ),
   );
   runApp(const MyApp());
