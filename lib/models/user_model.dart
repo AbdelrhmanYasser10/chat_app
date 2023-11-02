@@ -1,9 +1,13 @@
+import 'message_model.dart';
+
 class UserModel{
   late String userId;
   late String imgLink;
   late String name;
   late String email;
   late bool online;
+
+  MessageModel? lastMessage;
 
   UserModel.fromJson(Map<String,dynamic>json){
     userId = json["userId"];

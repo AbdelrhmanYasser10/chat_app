@@ -43,4 +43,12 @@ class UserEditDataLoading extends AppState{}
 class UserEditDataSuccessfully extends AppState{}
 class UserEditDataError extends AppState{}
 
+class SendMessage extends AppState{}
+class GetMessages extends AppState{}
+
+
+class GetUserState extends AppState{}
 class GetAllUsers extends AppState{}
+
+class GetRecentChats extends AppState{}
+class GetRecentChatsError extends AppState{}

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:chat_application_it/models/message_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -156,13 +157,14 @@ void login({
         password: password,
     ).then((value) {
       //set user online;
-      setUserOnline();
+      //setUserOnline();
       //get data
       _database.
       collection("users").
       doc(value.user!.uid).
       get().then((value){
         user = UserModel.fromJson(value.data()!);
+        setUserOnline();
         emit(LoginSuccessfully());
       }).catchError((error){
         emit(LoginError(error.toString()));
@@ -252,4 +254,110 @@ void login({
     });
 
   }
+
+  void sendMessage({
+  required String receiverId,
+  required String content,
+  }){
+    MessageModel message = MessageModel(
+      senderId: user!.userId,
+      receiverId: receiverId,
+      content: content,
+      time: Timestamp.now(),
+    );
+
+    _database.
+    collection('users').
+    doc(user!.userId)
+        .collection('chats').
+    doc(receiverId).set(message.toMap()).then((value) {
+      _database.
+      collection('users').
+      doc(receiverId)
+          .collection('chats').
+      doc(user!.userId).set(message.toMap()).then((value) {
+        _database.
+        collection('users').
+        doc(user!.userId)
+            .collection('chats').
+        doc(receiverId).
+        collection('messages').
+        add(message.toMap()).then((value) {
+          _database.
+          collection('users').
+          doc(receiverId)
+              .collection('chats').
+          doc(user!.userId).
+          collection('messages').
+          add(message.toMap()).then((value) {
+            emit(SendMessage());
+          });
+        });
+      });
+    });
+
+
+
+
+  }
+
+  List<MessageModel> messages = [];
+  void getMessages(String receiverId){
+    _database.
+    collection('users').
+    doc(user!.userId).
+    collection('chats').
+    doc(receiverId).
+    collection('messages').
+    orderBy('time').
+    snapshots().listen((event) {
+      messages = [];
+      event.docs.forEach((element) {
+        print(element);
+        messages.add(MessageModel.fromJson(element.data()));
+      });
+      print(messages.length);
+      emit(GetMessages());
+    });
+
+  }
+
+  bool? isReceiverOnline;
+  void checkUserOnline(String receiverId){
+    _database.
+    collection('users')
+    .doc(receiverId).
+    snapshots().
+    listen((event) {
+      isReceiverOnline = event.data()!['online'];
+      emit(GetUserState());
+    });
+  }
+
+
+  List<UserModel> recentUsers = [];
+
+  void getRecentlyChats(){
+    _database.
+    collection('users')
+    .doc(user!.userId)
+    .collection('chats')
+        .snapshots()
+        .listen((event) {
+      recentUsers = [];
+      event.docs.forEach((element) {
+        _database.collection('users')
+        .doc(element.id).get().then((value) {
+          recentUsers.add(UserModel.fromJson(value.data()!));
+          recentUsers.last.lastMessage = MessageModel.fromJson(element.data());
+        });
+        
+      });
+      emit(GetRecentChats());
+    }).onError((error){
+      emit(GetRecentChatsError());
+    });
+  }
+
+
 }

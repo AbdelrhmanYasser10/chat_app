@@ -43,6 +43,7 @@ dependencies:
   cloud_firestore: ^4.12.1
   image_picker: ^1.0.4
   image_cropper: ^5.0.0
+  chat_bubbles: ^1.5.0
 
 dev_dependencies:
   flutter_test:

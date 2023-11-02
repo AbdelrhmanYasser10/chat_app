@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:chat_application_it/layout/main_layout.dart';
-import 'package:chat_application_it/screens/home_screen.dart';
 import 'package:chat_application_it/screens/login_screen.dart';
 import 'package:chat_application_it/shared/cubits/app_cubit/app_cubit.dart';
 import 'package:chat_application_it/shared/widgets/my_button/my_button.dart';
